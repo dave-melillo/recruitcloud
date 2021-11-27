@@ -12,11 +12,11 @@ REPLACE(
     ''),
   ']',
   '') as sw_clean_email,
- from `rcdatawarehouse.raw.sw_contacts1`
+ from `rcdatawarehouse.raw.sw_contacts_prod`
 ), 
 
 --rf jobs transformation
-a as (select id, email,source_name, jobs from `rcdatawarehouse.raw.rf_candidate2`),
+a as (select id, email,source_name, jobs from `rcdatawarehouse.raw.rf_candidate_prod33`),
 
 b as (select id, email,source_name, REPLACE (jobs, "'", "\"") as jobs from a),
 
@@ -95,27 +95,24 @@ lower(stage_name) as stage_name_cleaner
 
 from bt),
 
---create flags
-fer as (
-select 
-*,
-case when stage_name = 'Sourced' then 1 else 0 end as source_flag,
-case when stage_name = 'Disqualified' then 1 else 0 end as dq_flag,
-case when stage_name = 'contacted LinkedIn' then 1 else 0 end as contacted_flag,
-case when stage_name  IN('email response','responded LinkedIn') then 1 else 0 end as response_flag,
-case when stage_name IN('Client Submission','Applied') then 1 else 0 end as applied_flag,
-case when stage_name = 'Hired' then 1 else 0 end as hired_flag
-from xer ),
 
 --more flags
 lpr as (
 select *,
-CASE WHEN hired_flag = 1 OR applied_flag = 1 OR response_flag = 1 OR contacted_flag = 1 OR source_flag = 1 then 1 else 0 end as source_flag_real, 
-CASE WHEN hired_flag = 1 OR applied_flag = 1 OR response_flag = 1 OR contacted_flag = 1  then 1 else 0 end as contacted_flag_real, 
-CASE WHEN hired_flag = 1 OR applied_flag = 1 OR response_flag = 1 then 1 else 0 end as response_flag_real, 
-CASE WHEN hired_flag = 1 OR applied_flag = 1 then 1 else 0 end as applied_flag_real,
-CASE WHEN hired_flag = 1 then 1 else 0 end as hired_flag_real,
-from fer),
+case when stage_name = 'Disqualified' then 1 else 0 end as dq_flag,
+1 as sourced_flag,
+case when stage_name like '%Hired%' OR stage_name like '%Offer%'OR stage_name like '%client final round%' OR stage_name like '%client second round%' OR stage_name like '%client screen%' OR stage_name like '%intro%' OR stage_name like '%email response%' OR stage like '%Replied%' OR stage like '%Clicked%' OR stage like '%Opened%' OR stage like '%Message%' then 1 else 0 end as messaged_flag,
+case when stage_name like '%Hired%' OR stage_name like '%Offer%'OR stage_name like '%client final round%' OR stage_name like '%client second round%' OR stage_name like '%client screen%' OR stage_name like '%intro%' OR stage_name like '%email response%' OR stage like '%Replied%' OR stage like '%Clicked%' OR stage like '%Opened%' then 1 else 0 end as opened_flag,
+case when stage_name like '%Hired%' OR stage_name like '%Offer%'OR stage_name like '%client final round%' OR stage_name like '%client second round%' OR stage_name like '%client screen%' OR stage_name like '%intro%' OR stage_name like '%email response%' OR stage like '%Replied%' OR stage like '%Clicked%' then 1 else 0 end as clicked_flag,
+case when stage_name like '%Hired%' OR stage_name like '%Offer%'OR stage_name like '%client final round%' OR stage_name like '%client second round%' OR stage_name like '%client screen%' OR stage_name like '%intro%' OR stage_name like '%email response%' OR stage like '%Replied%' then 1 else 0 end as replied_flag,
+case when stage_name like '%Hired%' OR stage_name like '%Offer%'OR stage_name like '%client final round%' OR stage_name like '%client second round%' OR stage_name like '%client screen%' OR stage_name like '%intro%' then 1 else 0 end as intro_call_flag,
+case when stage_name like '%Hired%' OR stage_name like '%Offer%'OR stage_name like '%client final round%' OR stage_name like '%client second round%' OR stage_name like '%client screen%' OR stage_name like '%submission%' then 1 else 0 end as client_submission_flag,
+case when stage_name like '%Hired%' OR stage_name like '%Offer%'OR stage_name like '%client final round%' OR stage_name like '%client second round%' OR stage_name like '%client screen%' then 1 else 0 end as client_screen_flag,
+case when stage_name like '%Hired%' OR stage_name like '%Offer%'OR stage_name like '%client final round%' OR stage_name like '%client second round%' then 1 else 0 end as client_second_round_flag, 
+case when stage_name like '%Hired%' OR stage_name like '%Offer%'OR stage_name like '%client final round%' then 1 else 0 end as client_final_round_flag, 
+case when stage_name like '%Hired%' OR stage_name like '%Offer%'then 1 else 0 end as offer_flag, 
+case when stage_name like '%Hired%' then 1 else 0 end as hire_flag
+from xer),
 
 -- create real job
 rgr as (
@@ -128,10 +125,6 @@ from lpr
 
 --selector and sw funnel
 select
-*,
-1 as sent_flag, 
-case when stage IN ('Replied') OR clicks > 0 then 1 else 0 end as clicked_flag, 
-case when stage IN ('Replied') OR opens > 0 then 1 else 0 end as opened_flag, 
-case when stage IN ('Replied') then 1 else 0 end as reply_flag
+*
 from rgr
 where campaign LIKE '%WH%' OR job_name like '%WH%'
