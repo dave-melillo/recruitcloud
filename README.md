@@ -1,5 +1,7 @@
 # recruitcloud
 
+![rc_arch](rcarch.png)
+
 ## Step 1
 
 Run [load.py](https://github.com/dave-melillo/recruitcloud/blob/main/load.py)
