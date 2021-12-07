@@ -68,10 +68,10 @@ project_id = 'rcdatawarehouse'
 
 #initialize loop
 for i in range(1, 1000):
-    if len(requests.get("https://recruiterflow.com/api/external/candidate/list?items_per_page=100&current_page="+str(i), headers={"rf-api-key":"84897999a1f9fb004bf444772327df97"}).json()) == 0:
+    if len(requests.get("https://recruiterflow.com/api/external/candidate/list?items_per_page=100&current_page="+str(i), headers={"rf-api-key":"XXX"}).json()) == 0:
         break
     else:
-        res=requests.get("https://recruiterflow.com/api/external/candidate/list?items_per_page=100&current_page="+str(i), headers={"rf-api-key":"84897999a1f9fb004bf444772327df97"}).json()
+        res=requests.get("https://recruiterflow.com/api/external/candidate/list?items_per_page=100&current_page="+str(i), headers={"rf-api-key":"XXX"}).json()
         data = json_normalize(res)
         df_temp = pd.DataFrame.from_dict(data)
         raw_data = raw_data.append(df_temp,ignore_index=True,sort=False)
@@ -101,8 +101,8 @@ else:
     from io import StringIO # Python 3.x
 
 
-client = boto3.client('s3', aws_access_key_id='AKIARDGZKJ3H3PPIS6X4',
-        aws_secret_access_key='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')
+client = boto3.client('s3', aws_access_key_id='XXX',
+        aws_secret_access_key='XXX')
 
 bucket_name = 'rcdatawarehouse'
 
@@ -137,8 +137,8 @@ else:
 
 df_list = []
 
-s3_client = boto3.client('s3', aws_access_key_id='AKIARDGZKJ3H3PPIS6X4',
-        aws_secret_access_key='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')
+s3_client = boto3.client('s3', aws_access_key_id='XXX',
+        aws_secret_access_key='XXX')
 
 paginator = s3_client.get_paginator('list_objects_v2')
 
@@ -228,8 +228,8 @@ else:
 
 df_list = []
 
-s3_client = boto3.client('s3', aws_access_key_id='AKIARDGZKJ3H3PPIS6X4',
-        aws_secret_access_key='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')
+s3_client = boto3.client('s3', aws_access_key_id='XXX',
+        aws_secret_access_key='XXX')
 
 paginator = s3_client.get_paginator('list_objects_v2')
 
@@ -275,8 +275,8 @@ else:
 
 df_list = []
 
-s3_client = boto3.client('s3', aws_access_key_id='AKIARDGZKJ3H3PPIS6X4',
-        aws_secret_access_key='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')
+s3_client = boto3.client('s3', aws_access_key_id='XXX',
+        aws_secret_access_key='XXX')
 
 paginator = s3_client.get_paginator('list_objects_v2')
 
